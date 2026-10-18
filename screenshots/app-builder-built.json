@@ -1,0 +1,38 @@
+{
+  "url": "http://127.0.0.1:8081/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "暖程",
+      "hasCanvas": false,
+      "bodyTextLen": 276,
+      "bodyTextHash": "13e3db89ab9e358cb96213a92656fc7f57e52bf60b2b729d9432d55a0e6696b2",
+      "bodyTextPrefix": "暖程 热身与恢复 5 公里、10 公里、马拉松。出发前把关节和髋打开，跑完再把紧的地方收回来。 5 公里 关节热开，把腿速留到路",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-built.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "暖程",
+      "hasCanvas": false,
+      "bodyTextLen": 276,
+      "bodyTextHash": "13e3db89ab9e358cb96213a92656fc7f57e52bf60b2b729d9432d55a0e6696b2",
+      "bodyTextPrefix": "暖程 热身与恢复 5 公里、10 公里、马拉松。出发前把关节和髋打开，跑完再把紧的地方收回来。 5 公里 关节热开，把腿速留到路",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-built-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/app-builder-built.json",
+  "divergesFromBaseline": false,
+  "baselineReasons": []
+}
