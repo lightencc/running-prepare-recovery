@@ -1,4 +1,4 @@
-import { voiceLines } from "./voice-lines";
+import { voiceLines } from "./voice-lines.ts";
 
 export type DistanceId = "5k" | "10k" | "marathon";
 export type Phase = "warmup" | "recover";
@@ -263,6 +263,102 @@ export const MOVES: Record<MoveId, Move> = {
   },
 };
 
+/**
+ * How each move is dosed. "steady" runs for the whole step; "drill" splits fast drills into
+ * timed sets; "reps" counts repetitions at the move's pace (seconds per rep, matching the
+ * demo animation); "hold" is one static stretch held for the step.
+ */
+export type Dose =
+  | { kind: "steady" }
+  | { kind: "drill" }
+  | { kind: "reps"; pace: number; unit: "次" | "圈" | "步" }
+  | { kind: "hold" };
+
+const DOSES: Record<MoveId, Dose> = {
+  jog: { kind: "steady" },
+  walk: { kind: "steady" },
+  stride: { kind: "steady" },
+  breathe: { kind: "steady" },
+  "high-knees": { kind: "drill" },
+  "butt-kicks": { kind: "drill" },
+  "a-skip": { kind: "drill" },
+  ankle: { kind: "reps", pace: 2.2, unit: "圈" },
+  "arm-circles": { kind: "reps", pace: 2.6, unit: "圈" },
+  "hip-circles": { kind: "reps", pace: 2.8, unit: "圈" },
+  "torso-twist": { kind: "reps", pace: 1.9, unit: "次" },
+  "leg-swing": { kind: "reps", pace: 1.6, unit: "次" },
+  "leg-swing-side": { kind: "reps", pace: 1.6, unit: "次" },
+  lunge: { kind: "reps", pace: 2.2, unit: "步" },
+  "side-lunge": { kind: "reps", pace: 3.2, unit: "次" },
+  "knee-hug": { kind: "reps", pace: 3, unit: "次" },
+  worlds: { kind: "reps", pace: 4.4, unit: "次" },
+  "calf-raise": { kind: "reps", pace: 1.93, unit: "次" },
+  chest: { kind: "reps", pace: 3.6, unit: "次" },
+  "cat-cow": { kind: "reps", pace: 4, unit: "次" },
+  bridge: { kind: "reps", pace: 3, unit: "次" },
+  "ankle-pump": { kind: "reps", pace: 2, unit: "次" },
+  calf: { kind: "hold" },
+  quad: { kind: "hold" },
+  hamstring: { kind: "hold" },
+  "hip-flexor": { kind: "hold" },
+  figure4: { kind: "hold" },
+  child: { kind: "hold" },
+  twist: { kind: "hold" },
+};
+
+export type Prescription = {
+  kind: Dose["kind"];
+  sets: number;
+  /** Amount per set: seconds for steady / drill / hold, a count for reps. */
+  each: number;
+  unit: "秒" | "次" | "圈" | "步";
+};
+
+/** Sets and amount per set for one step. Steps of 30 s or more split into two sets. */
+export function prescription(step: Step): Prescription {
+  const dose = DOSES[step.move];
+  const sets = (dose.kind === "drill" || dose.kind === "reps") && step.seconds >= 30 ? 2 : 1;
+  if (dose.kind === "reps") {
+    return { kind: dose.kind, sets, each: Math.max(3, Math.round(step.seconds / sets / dose.pace)), unit: dose.unit };
+  }
+  return { kind: dose.kind, sets, each: Math.round(step.seconds / sets), unit: "秒" };
+}
+
+export function doseLabel(p: Prescription) {
+  if (p.kind === "steady") return `持续 ${p.each} 秒`;
+  if (p.kind === "hold") return `保持 ${p.each} 秒`;
+  return `${p.sets} 组 × ${p.each} ${p.unit}`;
+}
+
+const DIGITS = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
+
+/** Spoken Chinese number for 0–99 ("两" for a lone 2, as in 两组). */
+export function spokenNumber(n: number, counting = false): string {
+  if (n === 2 && counting) return "两";
+  if (n < 10) return DIGITS[n];
+  const tens = Math.floor(n / 10);
+  const ones = n % 10;
+  return `${tens === 1 ? "" : DIGITS[tens]}十${ones ? DIGITS[ones] : ""}`;
+}
+
+/** Voice clip for a step's dose: id doubles as the audio file name. */
+export function doseLine(p: Prescription) {
+  const unitCode = { 秒: "s", 次: "r", 圈: "c", 步: "b" }[p.unit];
+  const id = `dose-${p.kind}-${p.sets}x${p.each}${unitCode}`;
+  const text =
+    p.kind === "steady"
+      ? `持续${spokenNumber(p.each)}秒。`
+      : p.kind === "hold"
+        ? `保持${spokenNumber(p.each)}秒。`
+        : `做${spokenNumber(p.sets, true)}组，${p.sets > 1 ? "每组" : ""}${spokenNumber(p.each)}${p.kind === "drill" ? "秒" : p.unit}。`;
+  return { id, text };
+}
+
+/** Spoken cue at the start of set n (n ≥ 2). */
+export function setLine(n: number) {
+  return { id: `set-${n}`, text: `第${spokenNumber(n)}组，开始。` };
+}
+
 export const DISTANCES: readonly {
   id: DistanceId;
   title: string;
@@ -439,6 +535,20 @@ export const ROUTINES: readonly Routine[] = [
     ],
   },
 ];
+
+/** Every dose and set-cue clip the routines need, for the voice build. */
+export function routineVoiceLines() {
+  const lines: Record<string, string> = {};
+  for (const routine of ROUTINES) {
+    for (const step of routine.steps) {
+      const p = prescription(step);
+      const dose = doseLine(p);
+      lines[dose.id] = dose.text;
+      for (let n = 2; n <= p.sets; n++) lines[setLine(n).id] = setLine(n).text;
+    }
+  }
+  return lines;
+}
 
 for (const move of Object.keys(MOVES) as MoveId[]) {
   if (!voiceLines[move]) throw new Error(`缺少讲解：${move}`);

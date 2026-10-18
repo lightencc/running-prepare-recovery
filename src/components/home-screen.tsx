@@ -5,7 +5,9 @@ import {
   MOVES,
   PHASES,
   distanceTitle,
+  doseLabel,
   formatClock,
+  prescription,
   routineFor,
   routineSeconds,
   sideLabel,
@@ -179,6 +181,7 @@ function MoveList({
             <span className="text-muted tabular-nums">{index + 1} </span>
             {MOVES[step.move].name}
             {step.side ? <span className="text-muted"> · {sideLabel(step.side)}</span> : null}
+            <span className="block text-xs text-muted tabular-nums">{doseLabel(prescription(step))}</span>
           </li>
         ))}
       </ol>
@@ -187,11 +190,13 @@ function MoveList({
 }
 
 function Mark() {
+  // 暖程: a sun rising over the horizon, its two arcs doubling as running-track lanes
   return (
-    <span className="grid h-10 w-10 place-items-center rounded-full bg-surface text-red" aria-hidden="true">
-      <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none">
-        <circle cx="12" cy="12" r="8.25" stroke="currentColor" strokeWidth="1.7" />
-        <path d="M8.2 14.2 12 8.4l3.8 5.8" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" strokeLinecap="round" />
+    <span className="grid h-10 w-10 place-items-center rounded-full bg-surface" aria-hidden="true">
+      <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" strokeLinecap="round">
+        <path d="M4.5 14.5a7.5 7.5 0 0 1 15 0" className="stroke-red" strokeWidth="2" />
+        <path d="M8.25 14.5a3.75 3.75 0 0 1 7.5 0" className="stroke-red" strokeWidth="2" opacity="0.55" />
+        <path d="M3 18h18" className="stroke-ink" strokeWidth="1.8" />
       </svg>
     </span>
   );

@@ -56,7 +56,7 @@ function Scene({ move, side, paused, muscles = true, focus, at, override, view: 
   const clock = useRef(0);
   const tween = useRef<{ from: Vector3; to: Vector3; fromT: Vector3; toT: Vector3; k: number } | null>(null);
   const framed = useRef("");
-  const { camera, size, invalidate } = useThree();
+  const { camera, size, invalidate, gl } = useThree();
   const controls = useThree((state) => state.controls) as unknown as { target: Vector3; update: () => void } | null;
 
   useEffect(() => {
@@ -81,6 +81,7 @@ function Scene({ move, side, paused, muscles = true, focus, at, override, view: 
       const first = framed.current === "";
       framed.current = key;
       if (first) {
+        gl.domElement.style.opacity = "1";
         camera.position.copy(target.position);
         controls?.target.copy(target.target);
         camera.lookAt(target.target);

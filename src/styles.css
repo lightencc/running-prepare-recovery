@@ -60,45 +60,10 @@ button {
   touch-action: none;
 }
 
-.coach-svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
-
-.coach-svg .skin,
-.coach-svg .hair {
-  fill: #d5d5d5;
-}
-
-.coach-svg .eye {
-  fill: #6b6b6b;
-}
-
-.coach-svg .shoe {
-  fill: #f7f7f7;
-}
-
-.coach-svg .shorts {
-  fill: #8a8a8a;
-}
-
-.coach-svg .shirt {
-  fill: var(--color-red);
-}
-
-.coach-svg .ground {
-  fill: #e4e4e4;
-}
-
-.coach-svg .prop-wall {
-  fill: #ececec;
+/* the figure fades in once the first frame is posed and framed, so no half-built frame shows */
+.coach-canvas canvas {
   opacity: 0;
-}
-
-.coach-svg[data-move="calf"] .prop-wall {
-  opacity: 1;
+  transition: opacity 0.25s ease-out;
 }
 
 .ring-track {

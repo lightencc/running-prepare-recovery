@@ -1,10 +1,9 @@
 import { Component, lazy, Suspense, useEffect, useState, type ReactNode } from "react";
-import type { Layout, MoveId, Phase, Side } from "@/content/library";
+import type { MoveId, Side } from "@/content/library";
 import { MUSCLE_NAMES, legendFor, type MuscleId } from "@/content/muscles";
-import { CoachFigure } from "@/components/coach-figure";
 
-// The 3D coach loads on demand (it brings in the 3D engine). The flat figure shows while it
-// loads, and stays when the device has no WebGL or the 3D scene fails.
+// The 3D coach loads on demand (it brings in the 3D engine). Devices without WebGL, or a scene
+// that fails, get a short notice instead.
 const CoachStage = lazy(() => import("@/components/coach3d/coach-stage"));
 
 function hasWebGL() {
@@ -28,18 +27,14 @@ class StageBoundary extends Component<{ fallback: ReactNode; children: ReactNode
 
 export function CoachView({
   move,
-  layout,
   side,
-  phase,
   paused,
   label,
   muscles,
   focus,
 }: {
   move: MoveId;
-  layout: Layout;
   side?: Side;
-  phase: Phase;
   paused: boolean;
   label: string;
   muscles: boolean;
@@ -48,11 +43,17 @@ export function CoachView({
   const [webgl, setWebgl] = useState<boolean | null>(null);
   useEffect(() => setWebgl(hasWebGL()), []);
 
-  const flat = <CoachFigure move={move} layout={layout} side={side} phase={phase} paused={paused} label={label} />;
-  if (!webgl) return flat;
+  // While the 3D engine loads the stage stays empty; the figure fades in on its first framed frame.
+  if (webgl === null) return null;
+  const unsupported = (
+    <p className="flex h-full items-center justify-center px-6 text-center text-sm text-black/50">
+      这台设备暂不支持 3D 动作演示
+    </p>
+  );
+  if (!webgl) return unsupported;
   return (
-    <StageBoundary fallback={flat}>
-      <Suspense fallback={flat}>
+    <StageBoundary fallback={unsupported}>
+      <Suspense fallback={null}>
         <CoachStage move={move} side={side} paused={paused} muscles={muscles} focus={focus} label={label} />
       </Suspense>
     </StageBoundary>

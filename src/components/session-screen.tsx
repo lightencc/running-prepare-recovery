@@ -5,12 +5,17 @@ import {
   MOVES,
   PHASES,
   distanceTitle,
+  doseLabel,
+  doseLine,
+  prescription,
+  setLine,
   formatClock,
   routineFor,
   routineSeconds,
   sideLabel,
   type DistanceId,
   type Phase,
+  type Step,
 } from "@/content/library";
 import { voiceLines } from "@/content/voice-lines";
 import { bindPlaying, playVoice, stopVoice, type Clip } from "@/lib/voice";
@@ -74,7 +79,7 @@ export function SessionScreen({
     setLeftMs(total);
     indexRef.current = index;
     if (!prefsRef.current.muted) {
-      playVoice(clipsFor(routine.id, steps[index]?.move ?? step.move, steps[index]?.side, index, nonce, prefsRef.current.voice));
+      playVoice(clipsFor(routine.id, steps[index] ?? steps[0], index, nonce, prefsRef.current.voice));
     } else {
       stopVoice();
     }
@@ -159,7 +164,7 @@ export function SessionScreen({
 
   function replay() {
     if (prefs.muted) onPrefs({ ...prefs, muted: false });
-    const clips = clipsFor(routine.id, step.move, step.side, index, nonce, prefs.voice).filter(
+    const clips = clipsFor(routine.id, step, index, nonce, prefs.voice).filter(
       (clip) => !clip.src.includes("/intro-"),
     );
     playVoice(clips);
@@ -171,6 +176,22 @@ export function SessionScreen({
   const display = Math.max(0, Math.ceil(leftMs / 1000));
   const side = sideLabel(step.side);
   const urgent = display <= 3 && display > 0 && running;
+  const dose = prescription(step);
+  const currentSet = Math.min(dose.sets, Math.floor(into / (step.seconds / dose.sets)) + 1);
+  const announced = useRef({ index: -1, set: 1 });
+  useEffect(() => {
+    // announce each new set after the first, once per step
+    // the first render of a new step still carries the previous step's clock, so only arm here
+    if (announced.current.index !== index) {
+      announced.current = { index, set: 1 };
+      return;
+    }
+    if (currentSet <= announced.current.set) return;
+    announced.current.set = currentSet;
+    if (prefsRef.current.muted) return;
+    const cue = setLine(currentSet);
+    playVoice([{ src: `/voice/${prefsRef.current.voice}/${cue.id}.mp3`, text: cue.text }]);
+  }, [currentSet, index]);
 
   return (
     <section className="flex min-h-dvh flex-col" data-phase={phase}>
@@ -208,9 +229,7 @@ export function SessionScreen({
       <div className="relative mx-4 mt-3 h-72 overflow-hidden rounded-card bg-stage">
         <CoachView
           move={step.move}
-          layout={move.layout}
           side={step.side}
-          phase={phase}
           paused={!running}
           label={move.name}
           muscles={muscles}
@@ -247,6 +266,14 @@ export function SessionScreen({
         <p className="mt-1 text-sm text-muted tabular-nums">
           {index + 1} / {steps.length}
           {side ? ` · ${side}` : ""}
+        </p>
+        <p className="mt-3 flex items-baseline gap-3 tabular-nums">
+          <span className="text-lg font-semibold">{doseLabel(dose)}</span>
+          {dose.sets > 1 ? (
+            <span className="text-sm text-red">
+              第 {currentSet}/{dose.sets} 组
+            </span>
+          ) : null}
         </p>
 
         <div className="mt-4">
@@ -386,8 +413,7 @@ function Ring({ ms, total }: { ms: number; total: number }) {
 
 function clipsFor(
   routineId: string,
-  move: string,
-  side: "left" | "right" | undefined,
+  step: Step,
   index: number,
   nonce: number,
   voice: Prefs["voice"],
@@ -398,10 +424,13 @@ function clipsFor(
     const id = `intro-${routineId}`;
     clips.push({ src: `${base}/${id}.mp3`, text: voiceLines[id] ?? "" });
   }
-  if (side) {
-    const id = side === "left" ? "side-left" : "side-right";
+  if (step.side) {
+    const id = step.side === "left" ? "side-left" : "side-right";
     clips.push({ src: `${base}/${id}.mp3`, text: voiceLines[id] ?? "" });
   }
-  clips.push({ src: `${base}/${move}.mp3`, text: voiceLines[move] ?? "" });
+  // how many sets, then how to do the move
+  const dose = doseLine(prescription(step));
+  clips.push({ src: `${base}/${dose.id}.mp3`, text: dose.text });
+  clips.push({ src: `${base}/${step.move}.mp3`, text: voiceLines[step.move] ?? "" });
   return clips;
 }

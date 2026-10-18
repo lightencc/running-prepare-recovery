@@ -2,6 +2,7 @@ import { spawn } from "node:child_process";
 import { mkdir, stat } from "node:fs/promises";
 import path from "node:path";
 import { voiceLines } from "../src/content/voice-lines.ts";
+import { routineVoiceLines } from "../src/content/library.ts";
 
 const voices: Record<string, string> = {
   xiaoxiao: "zh-CN-XiaoxiaoNeural",
@@ -12,7 +13,7 @@ type Job = { voice: string; out: string; text: string };
 
 const jobs: Job[] = [];
 for (const [folder, voice] of Object.entries(voices)) {
-  for (const [id, text] of Object.entries(voiceLines)) {
+  for (const [id, text] of Object.entries({ ...voiceLines, ...routineVoiceLines() })) {
     jobs.push({
       voice,
       text,
