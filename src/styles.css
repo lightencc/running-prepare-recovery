@@ -8,6 +8,8 @@
   --color-line: #2c2c2e;
   --color-red: #ef2b34;
   --color-rail: #1f6b4a;
+  --color-muscle: #ff3b30;
+  --color-muscle-soft: #ff9f0a;
   --color-stage: #ffffff;
   --font-sans: "Inter", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Zen Hei", sans-serif;
   --font-timer: "Inter", "Noto Sans SC", "PingFang SC", sans-serif;
@@ -52,6 +54,10 @@ button {
 ::selection {
   background: var(--color-red);
   color: var(--color-ink);
+}
+
+.coach-canvas {
+  touch-action: none;
 }
 
 .coach-svg {

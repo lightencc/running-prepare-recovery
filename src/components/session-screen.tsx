@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ChevronLeft, Pause, Play, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
+import type { MuscleId } from "@/content/muscles";
 import {
   MOVES,
   PHASES,
@@ -14,7 +15,7 @@ import {
 import { voiceLines } from "@/content/voice-lines";
 import { bindPlaying, playVoice, stopVoice, type Clip } from "@/lib/voice";
 import type { Prefs } from "@/components/app";
-import { CoachFigure } from "@/components/coach-figure";
+import { CoachView, MuscleLegend } from "@/components/coach-view";
 
 export function SessionScreen({
   distance,
@@ -39,6 +40,8 @@ export function SessionScreen({
   const [running, setRunning] = useState(true);
   const [confirming, setConfirming] = useState(false);
   const [playing, setPlaying] = useState(false);
+  const [muscles, setMuscles] = useState(true);
+  const [focus, setFocus] = useState<MuscleId | null>(null);
 
   const indexRef = useRef(0);
   const leftRef = useRef(leftMs);
@@ -62,6 +65,8 @@ export function SessionScreen({
       bindPlaying(() => {});
     };
   }, []);
+
+  useEffect(() => setFocus(null), [index]);
 
   useEffect(() => {
     const total = (steps[index]?.seconds ?? 0) * 1000;
@@ -200,16 +205,31 @@ export function SessionScreen({
         <div className="h-full bg-red" style={{ width: `${progress}%` }} />
       </div>
 
-      <div className="relative mx-4 mt-3 h-64 overflow-hidden rounded-card bg-stage">
-        <CoachFigure
+      <div className="relative mx-4 mt-3 h-72 overflow-hidden rounded-card bg-stage">
+        <CoachView
           move={step.move}
           layout={move.layout}
           side={step.side}
           phase={phase}
           paused={!running}
           label={move.name}
+          muscles={muscles}
+          focus={focus}
         />
         {side ? <span className="absolute left-4 top-4 text-sm font-medium text-red">{side}</span> : null}
+        <button
+          type="button"
+          aria-pressed={muscles}
+          onClick={() => {
+            setMuscles((value) => !value);
+            setFocus(null);
+          }}
+          className={`absolute right-3 top-3 h-8 rounded-full px-3 text-xs font-medium transition-colors duration-150 ${
+            muscles ? "bg-canvas text-ink" : "bg-black/10 text-black/60"
+          }`}
+        >
+          肌群
+        </button>
         {!running ? (
           <span className="absolute bottom-3 right-3 rounded-full bg-canvas px-3 py-1 text-xs text-ink">已暂停</span>
         ) : null}
@@ -228,6 +248,17 @@ export function SessionScreen({
           {index + 1} / {steps.length}
           {side ? ` · ${side}` : ""}
         </p>
+
+        <div className="mt-4">
+          <MuscleLegend
+            move={step.move}
+            focus={muscles ? focus : null}
+            onFocus={(id) => {
+              setMuscles(true);
+              setFocus(id);
+            }}
+          />
+        </div>
 
         <div className="mt-4 flex items-center justify-between gap-4">
           <div>
