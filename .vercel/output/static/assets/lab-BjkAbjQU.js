@@ -1,0 +1,2 @@
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/coach-stage-DAHKWT50.js","assets/index-DNc5le4q.js","assets/muscles-cOPT0FdB.js"])))=>i.map(i=>d[i]);
+import{c as e,i as t,o as n,t as r}from"./index-DNc5le4q.js";var i=e(n());t(),(0,i.lazy)(()=>r(()=>import(`./coach-stage-DAHKWT50.js`),__vite__mapDeps([0,1,2])));function a(){let[e,t]=(0,i.useState)(!1),[n,r]=(0,i.useState)({move:`jog`,muscles:!0}),[a,o]=(0,i.useState)({});return(0,i.useEffect)(()=>{t(!0),window.__lab={set:e=>r(t=>({...t,...e}))}},[]),null}export{a as component};

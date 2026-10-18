@@ -1,7 +1,8 @@
 import { i as __toESM } from "../_runtime.mjs";
-import { K as require_react, b as require_jsx_runtime } from "../_libs/@tanstack/react-router+[...].mjs";
+import { n as MUSCLE_NAMES, r as legendFor } from "./muscles-aV4ljYv5.mjs";
+import { l as require_jsx_runtime, u as require_react } from "../_libs/@react-three/drei+[...].mjs";
 import { a as SkipBack, c as Clock, i as SkipForward, l as ChevronLeft, n as Volume2, o as Play, s as Pause, t as VolumeX, u as ChevronDown } from "../_libs/lucide-react.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-8y48ojXJ.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-eOM53Wwj.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 /** Narration scripts. Audio is synthesized with Microsoft Edge neural voices. */
@@ -371,6 +372,159 @@ var MOVES = {
 		layout: "floor"
 	}
 };
+var DOSES = {
+	jog: { kind: "steady" },
+	walk: { kind: "steady" },
+	stride: { kind: "steady" },
+	breathe: { kind: "steady" },
+	"high-knees": { kind: "drill" },
+	"butt-kicks": { kind: "drill" },
+	"a-skip": { kind: "drill" },
+	ankle: {
+		kind: "reps",
+		pace: 2.2,
+		unit: "圈"
+	},
+	"arm-circles": {
+		kind: "reps",
+		pace: 2.6,
+		unit: "圈"
+	},
+	"hip-circles": {
+		kind: "reps",
+		pace: 2.8,
+		unit: "圈"
+	},
+	"torso-twist": {
+		kind: "reps",
+		pace: 1.9,
+		unit: "次"
+	},
+	"leg-swing": {
+		kind: "reps",
+		pace: 1.6,
+		unit: "次"
+	},
+	"leg-swing-side": {
+		kind: "reps",
+		pace: 1.6,
+		unit: "次"
+	},
+	lunge: {
+		kind: "reps",
+		pace: 2.2,
+		unit: "步"
+	},
+	"side-lunge": {
+		kind: "reps",
+		pace: 3.2,
+		unit: "次"
+	},
+	"knee-hug": {
+		kind: "reps",
+		pace: 3,
+		unit: "次"
+	},
+	worlds: {
+		kind: "reps",
+		pace: 4.4,
+		unit: "次"
+	},
+	"calf-raise": {
+		kind: "reps",
+		pace: 1.93,
+		unit: "次"
+	},
+	chest: {
+		kind: "reps",
+		pace: 3.6,
+		unit: "次"
+	},
+	"cat-cow": {
+		kind: "reps",
+		pace: 4,
+		unit: "次"
+	},
+	bridge: {
+		kind: "reps",
+		pace: 3,
+		unit: "次"
+	},
+	"ankle-pump": {
+		kind: "reps",
+		pace: 2,
+		unit: "次"
+	},
+	calf: { kind: "hold" },
+	quad: { kind: "hold" },
+	hamstring: { kind: "hold" },
+	"hip-flexor": { kind: "hold" },
+	figure4: { kind: "hold" },
+	child: { kind: "hold" },
+	twist: { kind: "hold" }
+};
+/** Sets and amount per set for one step. Steps of 30 s or more split into two sets. */
+function prescription(step) {
+	const dose = DOSES[step.move];
+	const sets = (dose.kind === "drill" || dose.kind === "reps") && step.seconds >= 30 ? 2 : 1;
+	if (dose.kind === "reps") return {
+		kind: dose.kind,
+		sets,
+		each: Math.max(3, Math.round(step.seconds / sets / dose.pace)),
+		unit: dose.unit
+	};
+	return {
+		kind: dose.kind,
+		sets,
+		each: Math.round(step.seconds / sets),
+		unit: "秒"
+	};
+}
+function doseLabel(p) {
+	if (p.kind === "steady") return `持续 ${p.each} 秒`;
+	if (p.kind === "hold") return `保持 ${p.each} 秒`;
+	return `${p.sets} 组 × ${p.each} ${p.unit}`;
+}
+var DIGITS = [
+	"零",
+	"一",
+	"二",
+	"三",
+	"四",
+	"五",
+	"六",
+	"七",
+	"八",
+	"九"
+];
+/** Spoken Chinese number for 0–99 ("两" for a lone 2, as in 两组). */
+function spokenNumber(n, counting = false) {
+	if (n === 2 && counting) return "两";
+	if (n < 10) return DIGITS[n];
+	const tens = Math.floor(n / 10);
+	const ones = n % 10;
+	return `${tens === 1 ? "" : DIGITS[tens]}十${ones ? DIGITS[ones] : ""}`;
+}
+/** Voice clip for a step's dose: id doubles as the audio file name. */
+function doseLine(p) {
+	const unitCode = {
+		秒: "s",
+		次: "r",
+		圈: "c",
+		步: "b"
+	}[p.unit];
+	return {
+		id: `dose-${p.kind}-${p.sets}x${p.each}${unitCode}`,
+		text: p.kind === "steady" ? `持续${spokenNumber(p.each)}秒。` : p.kind === "hold" ? `保持${spokenNumber(p.each)}秒。` : `做${spokenNumber(p.sets, true)}组，${p.sets > 1 ? "每组" : ""}${spokenNumber(p.each)}${p.kind === "drill" ? "秒" : p.unit}。`
+	};
+}
+/** Spoken cue at the start of set n (n ≥ 2). */
+function setLine(n) {
+	return {
+		id: `set-${n}`,
+		text: `第${spokenNumber(n)}组，开始。`
+	};
+}
 var DISTANCES = [
 	{
 		id: "5k",
@@ -843,822 +997,119 @@ function MoveList({ phase, steps }) {
 				step.side ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 					className: "text-muted",
 					children: [" · ", sideLabel(step.side)]
-				}) : null
+				}) : null,
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "block text-xs text-muted tabular-nums",
+					children: doseLabel(prescription(step))
+				})
 			]
 		}, `${step.move}-${index}`))
 	})] });
 }
 function Mark() {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-		className: "grid h-10 w-10 place-items-center rounded-full bg-surface text-red",
+		className: "grid h-10 w-10 place-items-center rounded-full bg-surface",
 		"aria-hidden": "true",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
 			viewBox: "0 0 24 24",
 			className: "h-6 w-6",
 			fill: "none",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", {
-				cx: "12",
-				cy: "12",
-				r: "8.25",
-				stroke: "currentColor",
-				strokeWidth: "1.7"
-			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", {
-				d: "M8.2 14.2 12 8.4l3.8 5.8",
-				stroke: "currentColor",
-				strokeWidth: "1.7",
-				strokeLinejoin: "round",
-				strokeLinecap: "round"
-			})]
+			strokeLinecap: "round",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", {
+					d: "M4.5 14.5a7.5 7.5 0 0 1 15 0",
+					className: "stroke-red",
+					strokeWidth: "2"
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", {
+					d: "M8.25 14.5a3.75 3.75 0 0 1 7.5 0",
+					className: "stroke-red",
+					strokeWidth: "2",
+					opacity: "0.55"
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", {
+					d: "M3 18h18",
+					className: "stroke-ink",
+					strokeWidth: "1.8"
+				})
+			]
 		})
 	});
 }
-var POSES = {
-	jog: {
-		dur: "0.55s",
-		bob: "0,0; 0,-8; 0,0; 0,-8; 0,0",
-		torso: "3; -3; 3",
-		thighF: "-34; 26; -34",
-		thighB: "26; -34; 26",
-		shinF: "14; 64; 14",
-		shinB: "64; 14; 64",
-		upperF: "32; -34; 32",
-		upperB: "-34; 32; -34"
-	},
-	walk: {
-		dur: "1.15s",
-		bob: "0,0; 0,-4; 0,0; 0,-4; 0,0",
-		torso: "2; -2; 2",
-		thighF: "-22; 16; -22",
-		thighB: "16; -22; 16",
-		shinF: "8; 30; 8",
-		shinB: "30; 8; 30",
-		upperF: "18; -16; 18",
-		upperB: "-16; 18; -16"
-	},
-	stride: {
-		dur: "0.46s",
-		bob: "0,0; 0,-12; 0,0; 0,-12; 0,0",
-		torso: "5; -4; 5",
-		thighF: "-48; 34; -48",
-		thighB: "34; -48; 34",
-		shinF: "12; 72; 12",
-		shinB: "72; 12; 72",
-		upperF: "40; -42; 40",
-		upperB: "-42; 40; -42"
-	},
-	"high-knees": {
-		dur: "0.5s",
-		bob: "0,0; 0,-11; 0,0; 0,-11; 0,0",
-		torso: "2; -2; 2",
-		thighF: "-78; 8; -78",
-		thighB: "8; -78; 8",
-		shinF: "74; 12; 74",
-		shinB: "12; 74; 12",
-		upperF: "36; -34; 36",
-		upperB: "-34; 36; -34"
-	},
-	"butt-kicks": {
-		dur: "0.46s",
-		bob: "0,0; 0,-6; 0,0; 0,-6; 0,0",
-		thighF: "10; 16; 10",
-		thighB: "16; 10; 16",
-		shinF: "10; 124; 10",
-		shinB: "124; 10; 124",
-		upperF: "28; -26; 28",
-		upperB: "-26; 28; -26"
-	},
-	"a-skip": {
-		dur: "0.9s",
-		bob: "0,0; 0,-14; 0,-2; 0,-14; 0,0",
-		thighF: "-72; -72; 8; -72",
-		thighB: "8; -72; -72; 8",
-		shinF: "68; 68; 12; 68",
-		shinB: "12; 68; 68; 12",
-		upperF: "30; 30; -28; 30",
-		upperB: "-28; 30; 30; -28"
-	},
-	ankle: {
-		dur: "1.8s",
-		thighF: "-20; -20; -20",
-		shinF: "26; 26; 26",
-		footF: "0; 120; 240; 360",
-		thighB: "4; 4; 4",
-		upperF: "-36; -36; -36",
-		upperB: "12; 12; 12",
-		linear: true
-	},
-	"arm-circles": {
-		dur: "2.6s",
-		upperF: "0; -180; -360",
-		upperB: "0; 180; 360",
-		foreF: "0; 0; 0",
-		foreB: "0; 0; 0",
-		linear: true
-	},
-	"hip-circles": {
-		dur: "2.6s",
-		bob: "0,0; 18,5; 0,14; -18,5; 0,0",
-		upperF: "-66; -66; -66",
-		upperB: "66; 66; 66",
-		thighF: "-8; -8; -8",
-		thighB: "8; 8; 8"
-	},
-	"torso-twist": {
-		dur: "1.7s",
-		torso: "-18; 18; -18",
-		upperF: "-42; -42; -42",
-		upperB: "42; 42; 42"
-	},
-	"leg-swing": {
-		dur: "1.5s",
-		torso: "-4; 5; -4",
-		thighF: "38; -64; 38",
-		shinF: "6; 8; 6",
-		thighB: "4; 4; 4",
-		upperF: "-18; -40; -18",
-		upperB: "8; 20; 8"
-	},
-	"leg-swing-side": {
-		dur: "1.5s",
-		thighF: "-34; 38; -34",
-		shinF: "4; 6; 4",
-		thighB: "4; 4; 4",
-		upperF: "-24; -24; -24",
-		upperB: "18; 18; 18"
-	},
-	lunge: {
-		dur: "2.6s",
-		bob: "0,0; 16,18; 16,18; 0,0; 16,18; 16,18; 0,0",
-		torso: "0; -8; -8; 0; -8; -8; 0",
-		thighF: "0; -56; -56; 0; 10; 10; 0",
-		shinF: "4; 62; 62; 4; 6; 6; 4",
-		thighB: "0; 32; 32; 0; -56; -56; 0",
-		shinB: "4; -12; -12; 4; 62; 62; 4",
-		upperF: "-12; -48; -48; -12; 16; 16; -12",
-		upperB: "14; 18; 18; 14; -48; -48; 14"
-	},
-	"side-lunge": {
-		dur: "2.4s",
-		bob: "0,0; -30,18; -30,18; 0,0",
-		thighF: "0; -16; -16; 0",
-		shinF: "0; 46; 46; 0",
-		thighB: "0; 24; 24; 0",
-		shinB: "0; 4; 4; 0",
-		upperF: "-8; -36; -36; -8",
-		upperB: "8; 20; 20; 8"
-	},
-	"knee-hug": {
-		dur: "2.4s",
-		torso: "0; 14; 14; 14; 0",
-		thighF: "0; -76; -76; -76; 0",
-		shinF: "4; 84; 84; 84; 4",
-		thighB: "0; 4; 4; 4; 0",
-		upperF: "-12; -102; -102; -102; -12",
-		foreF: "18; -24; -24; -24; 18",
-		upperB: "12; 8; 8; 8; 12"
-	},
-	worlds: {
-		dur: "3.4s",
-		bob: "0,0; 16,18; 16,18; 18,22; 18,22; 0,0",
-		torso: "0; -8; -8; -20; -20; 0",
-		thighF: "0; -56; -56; -60; -60; 0",
-		shinF: "4; 60; 60; 66; 66; 4",
-		thighB: "0; 30; 30; 34; 34; 0",
-		shinB: "4; -8; -8; -4; -4; 4",
-		upperF: "-14; -42; -42; -158; -158; -14",
-		foreF: "18; 12; 12; 6; 6; 18",
-		upperB: "12; 20; 20; 24; 24; 12"
-	},
-	"calf-raise": {
-		dur: "1.45s",
-		bob: "0,0; 0,-18; 0,-18; 0,0",
-		footF: "0; -20; -20; 0",
-		footB: "0; -20; -20; 0",
-		upperF: "-8; -12; -12; -8",
-		upperB: "10; 14; 14; 10"
-	},
-	calf: {
-		dur: "2.2s",
-		bob: "14,6; 22,8; 14,6",
-		torso: "-14; -18; -14",
-		thighF: "-28; -36; -28",
-		shinF: "34; 42; 34",
-		thighB: "18; 20; 18",
-		shinB: "0; 2; 0",
-		upperF: "-74; -82; -74",
-		upperB: "-68; -76; -68"
-	},
-	quad: {
-		dur: "2.3s",
-		torso: "-2; 3; -2",
-		thighB: "8; 12; 8",
-		shinB: "104; 126; 104",
-		upperB: "28; 50; 28",
-		foreB: "14; 40; 14",
-		thighF: "2; 4; 2",
-		shinF: "4; 6; 4",
-		upperF: "-16; -20; -16"
-	},
-	hamstring: {
-		dur: "2.8s",
-		bob: "0,0; -8,12; -8,16; -8,12",
-		torso: "6; 56; 68; 56",
-		thighF: "-6; -18; -22; -18",
-		shinF: "2; 6; 8; 6",
-		thighB: "2; 8; 8; 8",
-		upperF: "-16; -42; -50; -42",
-		upperB: "10; 16; 18; 16"
-	},
-	"hip-flexor": {
-		dur: "3s",
-		bob: "0,0; 10,36; 18,40; 10,36; 0,0",
-		torso: "0; -4; -8; -4; 0",
-		thighB: "0; 84; 90; 84; 0",
-		shinB: "0; -90; -96; -90; 0",
-		thighF: "0; -46; -52; -46; 0",
-		shinF: "0; 50; 56; 50; 0",
-		upperF: "-10; -28; -32; -28; -10",
-		upperB: "8; 14; 16; 14; 8"
-	},
-	figure4: {
-		dur: "2.8s",
-		bob: "0,0; 0,12; 0,18; 0,12; 0,0",
-		thighF: "0; -44; -52; -44; 0",
-		shinF: "0; 72; 84; 72; 0",
-		thighB: "0; -6; -10; -6; 0",
-		shinB: "0; 16; 22; 16; 0",
-		upperF: "-8; -32; -40; -32; -8",
-		upperB: "8; 18; 22; 18; 8"
-	},
-	chest: {
-		dur: "3.2s",
-		breath: "1,1; 1.04,1.06; 1,1",
-		upperF: "-6; -80; -92; -80; -6",
-		upperB: "6; 80; 92; 80; 6",
-		foreF: "14; 30; 36; 30; 14",
-		foreB: "14; 30; 36; 30; 14"
-	},
-	breathe: {
-		dur: "4.2s",
-		breath: "1,1; 1.05,1.08; 1,1",
-		bob: "0,0; 0,-3; 0,0",
-		upperF: "6; 4; 6",
-		upperB: "-4; -2; -4"
-	},
-	child: { dur: "3s" },
-	"cat-cow": { dur: "2.6s" },
-	twist: {
-		dur: "3.2s",
-		torso: "90; 90; 90; 90",
-		thighF: "90; 30; 18; 90",
-		shinF: "0; 64; 74; 0",
-		thighB: "92; 92; 92; 92",
-		shinB: "0; 0; 0; 0",
-		upperF: "70; 70; 70; 70",
-		upperB: "20; 20; 20; 20"
-	},
-	bridge: {
-		dur: "2.6s",
-		bob: "0,0; 0,-44; 0,-44; 0,0",
-		torso: "90; 78; 74; 90",
-		thighF: "92; 40; 36; 92",
-		thighB: "92; 40; 36; 92",
-		shinF: "0; 50; 56; 0",
-		shinB: "0; 50; 56; 0",
-		upperF: "40; 20; 16; 40",
-		upperB: "20; 8; 6; 20"
-	},
-	"ankle-pump": {
-		dur: "1.15s",
-		torso: "90; 90; 90",
-		thighF: "90; 90; 90",
-		thighB: "90; 90; 90",
-		footF: "-18; 26; -18",
-		footB: "-18; 26; -18",
-		upperF: "30; 30; 30",
-		upperB: "12; 12; 12"
+var CoachStage = (0, import_react.lazy)(() => import("./coach-stage-BUkOs7ve.mjs"));
+function hasWebGL() {
+	try {
+		const canvas = document.createElement("canvas");
+		return Boolean(canvas.getContext("webgl2") ?? canvas.getContext("webgl"));
+	} catch {
+		return false;
+	}
+}
+var StageBoundary = class extends import_react.Component {
+	state = { failed: false };
+	static getDerivedStateFromError() {
+		return { failed: true };
+	}
+	render() {
+		return this.state.failed ? this.props.fallback : this.props.children;
 	}
 };
-var SWAP = /* @__PURE__ */ new Set([
-	"ankle",
-	"leg-swing",
-	"leg-swing-side",
-	"side-lunge",
-	"knee-hug",
-	"worlds",
-	"calf",
-	"quad",
-	"hamstring",
-	"hip-flexor",
-	"figure4",
-	"twist"
-]);
-function negateBob(values) {
-	if (!values) return values;
-	return values.split(";").map((part) => {
-		const [x, y] = part.split(",").map((item) => item.trim());
-		if (y === void 0) return part.trim();
-		return `${-Number(x)},${y}`;
-	}).join("; ");
+function CoachView({ move, side, paused, label, muscles, focus }) {
+	const [webgl, setWebgl] = (0, import_react.useState)(null);
+	(0, import_react.useEffect)(() => setWebgl(hasWebGL()), []);
+	if (webgl === null) return null;
+	const unsupported = /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+		className: "flex h-full items-center justify-center px-6 text-center text-sm text-black/50",
+		children: "这台设备暂不支持 3D 动作演示"
+	});
+	if (!webgl) return unsupported;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StageBoundary, {
+		fallback: unsupported,
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_react.Suspense, {
+			fallback: null,
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CoachStage, {
+				move,
+				side,
+				paused,
+				muscles,
+				focus,
+				label
+			})
+		})
+	});
 }
-function poseFor(move, side) {
-	const pose = POSES[move];
-	if (side !== "right" || !SWAP.has(move)) return pose;
-	return {
-		...pose,
-		bob: negateBob(pose.bob),
-		thighF: pose.thighB,
-		thighB: pose.thighF,
-		shinF: pose.shinB,
-		shinB: pose.shinF,
-		footF: pose.footB,
-		footB: pose.footF,
-		upperF: pose.upperB,
-		upperB: pose.upperF,
-		foreF: pose.foreB,
-		foreB: pose.foreF
+function MuscleLegend({ move, focus, onFocus }) {
+	const { primary, secondary } = legendFor(move);
+	const chip = (id, level) => {
+		const active = focus === id;
+		return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+			type: "button",
+			"aria-pressed": active,
+			onClick: () => onFocus(active ? null : id),
+			className: `flex h-8 items-center gap-1.5 rounded-full px-3 text-xs transition-colors duration-150 ${active ? "bg-ink text-canvas" : "bg-surface text-ink"} ${focus && !active ? "opacity-50" : ""}`,
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+				className: `h-2 w-2 rounded-full ${level === "primary" ? "bg-muscle" : "bg-muscle-soft"}`,
+				"aria-hidden": "true"
+			}), MUSCLE_NAMES[id]]
+		}, id);
 	};
-}
-function useSvgPause(ref, paused) {
-	(0, import_react.useEffect)(() => {
-		const svg = ref.current;
-		if (!svg) return;
-		if (paused) svg.pauseAnimations();
-		else svg.unpauseAnimations();
-	}, [paused, ref]);
-}
-function useReducedMotion() {
-	const [reduced, setReduced] = (0, import_react.useState)(false);
-	(0, import_react.useEffect)(() => {
-		const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-		const apply = () => setReduced(media.matches);
-		apply();
-		media.addEventListener("change", apply);
-		return () => media.removeEventListener("change", apply);
-	}, []);
-	return reduced;
-}
-function Spin({ kind, values, dur, linear, fallback, reduced, children }) {
-	if (!values) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("g", {
-		transform: fallback,
-		children
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "flex flex-col gap-2",
+		"aria-label": "训练肌群",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "flex flex-wrap items-center gap-2",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+				className: "w-8 text-xs text-muted",
+				children: "主要"
+			}), primary.map((id) => chip(id, "primary"))]
+		}), secondary.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "flex flex-wrap items-center gap-2",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+				className: "w-8 text-xs text-muted",
+				children: "次要"
+			}), secondary.map((id) => chip(id, "secondary"))]
+		}) : null]
 	});
-	if (reduced) {
-		const parts = values.split(";").map((item) => item.trim());
-		const mid = parts[Math.min(parts.length - 1, Math.floor(parts.length / 2))] ?? parts[0];
-		const transform = kind === "rotate" ? `rotate(${mid})` : kind === "translate" ? `translate(${mid})` : `scale(${mid})`;
-		return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("g", {
-			transform,
-			children
-		});
-	}
-	const count = values.split(";").length;
-	const keyTimes = Array.from({ length: count }, (_, index) => (index / (count - 1)).toFixed(4)).join(";");
-	const keySplines = Array.from({ length: Math.max(0, count - 1) }, () => "0.45 0 0.55 1").join(";");
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("g", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("animateTransform", {
-		attributeName: "transform",
-		type: kind,
-		values,
-		dur,
-		repeatCount: "indefinite",
-		begin: "0s",
-		keyTimes,
-		calcMode: linear ? "linear" : "spline",
-		...linear ? {} : { keySplines }
-	}), children] });
-}
-function Head({ front }) {
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("g", {
-		className: "head",
-		transform: front ? "translate(0,-132)" : "translate(10,-128)",
-		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("ellipse", {
-				className: "hair",
-				cx: 0,
-				cy: -8,
-				rx: 32,
-				ry: 26
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", {
-				className: "skin",
-				cx: 0,
-				cy: 2,
-				r: 28
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("ellipse", {
-				className: "hair",
-				cx: front ? 0 : -2,
-				cy: -18,
-				rx: 28,
-				ry: 14
-			}),
-			front ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", {
-				className: "eye",
-				cx: -7,
-				cy: 2,
-				r: 2.2
-			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", {
-				className: "eye",
-				cx: 7,
-				cy: 2,
-				r: 2.2
-			})] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", {
-				className: "eye",
-				cx: 12,
-				cy: 1,
-				r: 2.2
-			})
-		]
-	});
-}
-function Limb({ pose, part, dur, linear, reduced, foreFallback, upperFallback }) {
-	return {
-		thigh: part === "f" ? pose.thighF : pose.thighB,
-		shin: part === "f" ? pose.shinF : pose.shinB,
-		foot: part === "f" ? pose.footF : pose.footB,
-		upper: part === "f" ? pose.upperF : pose.upperB,
-		fore: part === "f" ? pose.foreF : pose.foreB,
-		dur,
-		linear,
-		reduced,
-		foreFallback,
-		upperFallback
-	};
-}
-function Leg({ part, pose, reduced }) {
-	const bits = Limb({
-		pose,
-		part,
-		dur: pose.dur,
-		linear: pose.linear,
-		reduced,
-		foreFallback: "rotate(18)",
-		upperFallback: part === "f" ? "rotate(-12)" : "rotate(14)"
-	});
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("g", {
-		className: `leg leg-${part}`,
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Spin, {
-			kind: "rotate",
-			values: bits.thigh,
-			dur: pose.dur,
-			reduced,
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", {
-				className: "skin",
-				x: -15,
-				y: 0,
-				width: 30,
-				height: 74,
-				rx: 15
-			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("g", {
-				transform: "translate(0,66)",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Spin, {
-					kind: "rotate",
-					values: bits.shin,
-					dur: pose.dur,
-					reduced,
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", {
-						className: "skin",
-						x: -12,
-						y: 0,
-						width: 24,
-						height: 66,
-						rx: 12
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("g", {
-						transform: "translate(0,58)",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Spin, {
-							kind: "rotate",
-							values: bits.foot,
-							dur: pose.dur,
-							linear: pose.linear,
-							reduced,
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ellipse", {
-								className: "shoe",
-								cx: 18,
-								cy: 8,
-								rx: 28,
-								ry: 10
-							})
-						})
-					})]
-				})
-			})]
-		})
-	});
-}
-function Arm({ part, pose, reduced, x }) {
-	const upper = part === "f" ? pose.upperF : pose.upperB;
-	const fore = part === "f" ? pose.foreF : pose.foreB;
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("g", {
-		className: `arm arm-${part}`,
-		transform: `translate(${x},-90)`,
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Spin, {
-			kind: "rotate",
-			values: upper,
-			dur: pose.dur,
-			linear: pose.linear,
-			fallback: part === "f" ? "rotate(-12)" : "rotate(16)",
-			reduced,
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", {
-				className: "skin",
-				x: -8,
-				y: 0,
-				width: 16,
-				height: 48,
-				rx: 8
-			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("g", {
-				transform: "translate(0,42)",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Spin, {
-					kind: "rotate",
-					values: fore,
-					dur: pose.dur,
-					fallback: "rotate(18)",
-					reduced,
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", {
-						className: "skin",
-						x: -7,
-						y: 0,
-						width: 14,
-						height: 42,
-						rx: 7
-					})
-				})
-			})]
-		})
-	});
-}
-function Torso({ pose, front, reduced }) {
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("g", {
-		className: "torso",
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Spin, {
-			kind: "rotate",
-			values: pose.torso,
-			dur: pose.dur,
-			reduced,
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Spin, {
-				kind: "scale",
-				values: pose.breath,
-				dur: pose.dur,
-				reduced,
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", {
-						className: "shirt",
-						x: front ? -40 : -34,
-						y: -112,
-						width: front ? 80 : 68,
-						height: 116,
-						rx: 28
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Head, { front }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", {
-						className: "shorts",
-						x: front ? -42 : -36,
-						y: -16,
-						width: front ? 84 : 72,
-						height: 44,
-						rx: 16
-					})
-				]
-			})
-		})
-	});
-}
-function Human({ move, layout, side, phase, paused, label }) {
-	const ref = (0, import_react.useRef)(null);
-	useSvgPause(ref, paused);
-	const reduced = useReducedMotion();
-	const pose = poseFor(move, side);
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
-		ref,
-		viewBox: layout === "floor" ? "10 70 340 270" : "50 8 220 330",
-		className: "coach-svg",
-		"data-phase": phase,
-		"data-move": move,
-		role: "img",
-		"aria-label": label,
-		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("ellipse", {
-				className: "ground",
-				cx: 160,
-				cy: 324,
-				rx: 86,
-				ry: 10
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", {
-				className: "prop-wall",
-				x: 236,
-				y: 120,
-				width: 18,
-				height: 200,
-				rx: 6
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("g", {
-				className: "anchor",
-				transform: layout === "floor" ? "translate(168,214)" : "translate(160,176)",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Spin, {
-					kind: "translate",
-					values: pose.bob,
-					dur: pose.dur,
-					reduced,
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Arm, {
-							part: "b",
-							pose,
-							reduced,
-							x: layout === "front" ? 42 : -8
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("g", {
-							transform: layout === "front" ? "translate(22,0)" : void 0,
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Leg, {
-								part: "b",
-								pose,
-								reduced
-							})
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Torso, {
-							pose,
-							front: layout === "front",
-							reduced
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("g", {
-							transform: layout === "front" ? "translate(-22,0)" : void 0,
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Leg, {
-								part: "f",
-								pose,
-								reduced
-							})
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Arm, {
-							part: "f",
-							pose,
-							reduced,
-							x: layout === "front" ? -42 : 16
-						})
-					]
-				})
-			})
-		]
-	});
-}
-function QuadBody({ head, arm, thigh, dur, reduced }) {
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
-		/* @__PURE__ */ (0, import_jsx_runtime.jsx)("g", {
-			transform: "translate(36,10)",
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Spin, {
-				kind: "rotate",
-				values: thigh,
-				dur,
-				reduced,
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", {
-					className: "skin",
-					x: -9,
-					y: 0,
-					width: 18,
-					height: 64,
-					rx: 9
-				})
-			})
-		}),
-		/* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", {
-			className: "shirt",
-			x: -92,
-			y: -22,
-			width: 124,
-			height: 44,
-			rx: 18
-		}),
-		/* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", {
-			className: "shorts",
-			x: -4,
-			y: -18,
-			width: 52,
-			height: 32,
-			rx: 12
-		}),
-		/* @__PURE__ */ (0, import_jsx_runtime.jsx)("g", {
-			transform: "translate(-108,0)",
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Spin, {
-				kind: "rotate",
-				values: head,
-				dur,
-				reduced,
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("ellipse", {
-						className: "hair",
-						cx: -4,
-						cy: -6,
-						rx: 24,
-						ry: 20
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", {
-						className: "skin",
-						r: 20
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("ellipse", {
-						className: "hair",
-						cx: -2,
-						cy: -12,
-						rx: 20,
-						ry: 11
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", {
-						className: "eye",
-						cx: 10,
-						cy: 0,
-						r: 2.1
-					})
-				]
-			})
-		}),
-		/* @__PURE__ */ (0, import_jsx_runtime.jsx)("g", {
-			transform: "translate(-46,14)",
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Spin, {
-				kind: "rotate",
-				values: arm,
-				dur,
-				reduced,
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", {
-					className: "skin",
-					x: -6,
-					y: 0,
-					width: 12,
-					height: 66,
-					rx: 6
-				})
-			})
-		})
-	] });
-}
-function Quad({ move, phase, paused, label }) {
-	const ref = (0, import_react.useRef)(null);
-	useSvgPause(ref, paused);
-	const reduced = useReducedMotion();
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
-		ref,
-		viewBox: "0 0 360 420",
-		className: "coach-svg",
-		"data-phase": phase,
-		role: "img",
-		"aria-label": label,
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("ellipse", {
-			className: "ground",
-			cx: 180,
-			cy: 348,
-			rx: 116,
-			ry: 12
-		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("g", {
-			transform: "translate(196,246)",
-			children: move === "child" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Spin, {
-				kind: "translate",
-				values: "-8,30; -8,36; -8,30",
-				dur: "3.2s",
-				reduced,
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("g", {
-					transform: "rotate(16)",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(QuadBody, {
-						head: "18; 22; 18",
-						arm: "-84; -84; -84",
-						thigh: "20; 20; 20",
-						dur: "3.2s",
-						reduced
-					})
-				})
-			}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Spin, {
-				kind: "translate",
-				values: "0,12; 0,-14; 0,12",
-				dur: "2.6s",
-				reduced,
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Spin, {
-					kind: "rotate",
-					values: "12; -12; 12",
-					dur: "2.6s",
-					reduced,
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(QuadBody, {
-						head: "-14; 18; -14",
-						arm: "2; 2; 2",
-						thigh: "0; 0; 0",
-						dur: "2.6s",
-						reduced
-					})
-				})
-			})
-		})]
-	});
-}
-function CoachFigure({ move, layout, side, phase, paused, label }) {
-	if (layout === "quad") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Quad, {
-		move,
-		phase,
-		paused,
-		label
-	}, move);
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Human, {
-		move,
-		layout,
-		side,
-		phase,
-		paused,
-		label
-	}, `${move}-${side ?? "na"}-${layout}`);
 }
 function SessionScreen({ distance, phase, prefs, onPrefs, onExit, onDone }) {
 	const routine = routineFor(distance, phase);
@@ -1669,6 +1120,8 @@ function SessionScreen({ distance, phase, prefs, onPrefs, onExit, onDone }) {
 	const [running, setRunning] = (0, import_react.useState)(true);
 	const [confirming, setConfirming] = (0, import_react.useState)(false);
 	const [playing, setPlaying] = (0, import_react.useState)(false);
+	const [muscles, setMuscles] = (0, import_react.useState)(true);
+	const [focus, setFocus] = (0, import_react.useState)(null);
 	const indexRef = (0, import_react.useRef)(0);
 	const leftRef = (0, import_react.useRef)(leftMs);
 	const endAt = (0, import_react.useRef)(0);
@@ -1689,12 +1142,13 @@ function SessionScreen({ distance, phase, prefs, onPrefs, onExit, onDone }) {
 			bindPlaying(() => {});
 		};
 	}, []);
+	(0, import_react.useEffect)(() => setFocus(null), [index]);
 	(0, import_react.useEffect)(() => {
 		const total = (steps[index]?.seconds ?? 0) * 1e3;
 		leftRef.current = total;
 		setLeftMs(total);
 		indexRef.current = index;
-		if (!prefsRef.current.muted) playVoice(clipsFor(routine.id, steps[index]?.move ?? step.move, steps[index]?.side, index, nonce, prefsRef.current.voice));
+		if (!prefsRef.current.muted) playVoice(clipsFor(routine.id, steps[index] ?? steps[0], index, nonce, prefsRef.current.voice));
 		else stopVoice();
 		if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(12);
 	}, [
@@ -1781,7 +1235,7 @@ function SessionScreen({ distance, phase, prefs, onPrefs, onExit, onDone }) {
 			...prefs,
 			muted: false
 		});
-		playVoice(clipsFor(routine.id, step.move, step.side, index, nonce, prefs.voice).filter((clip) => !clip.src.includes("/intro-")));
+		playVoice(clipsFor(routine.id, step, index, nonce, prefs.voice).filter((clip) => !clip.src.includes("/intro-")));
 	}
 	const doneSeconds = steps.slice(0, index).reduce((sum, item) => sum + item.seconds, 0);
 	const into = step.seconds - leftMs / 1e3;
@@ -1789,6 +1243,29 @@ function SessionScreen({ distance, phase, prefs, onPrefs, onExit, onDone }) {
 	const display = Math.max(0, Math.ceil(leftMs / 1e3));
 	const side = sideLabel(step.side);
 	const urgent = display <= 3 && display > 0 && running;
+	const dose = prescription(step);
+	const currentSet = Math.min(dose.sets, Math.floor(into / (step.seconds / dose.sets)) + 1);
+	const announced = (0, import_react.useRef)({
+		index: -1,
+		set: 1
+	});
+	(0, import_react.useEffect)(() => {
+		if (announced.current.index !== index) {
+			announced.current = {
+				index,
+				set: 1
+			};
+			return;
+		}
+		if (currentSet <= announced.current.set) return;
+		announced.current.set = currentSet;
+		if (prefsRef.current.muted) return;
+		const cue = setLine(currentSet);
+		playVoice([{
+			src: `/voice/${prefsRef.current.voice}/${cue.id}.mp3`,
+			text: cue.text
+		}]);
+	}, [currentSet, index]);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
 		className: "flex min-h-dvh flex-col",
 		"data-phase": phase,
@@ -1836,20 +1313,30 @@ function SessionScreen({ distance, phase, prefs, onPrefs, onExit, onDone }) {
 				})
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "relative mx-4 mt-3 h-64 overflow-hidden rounded-card bg-stage",
+				className: "relative mx-4 mt-3 h-72 overflow-hidden rounded-card bg-stage",
 				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CoachFigure, {
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CoachView, {
 						move: step.move,
-						layout: move.layout,
 						side: step.side,
-						phase,
 						paused: !running,
-						label: move.name
+						label: move.name,
+						muscles,
+						focus
 					}),
 					side ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 						className: "absolute left-4 top-4 text-sm font-medium text-red",
 						children: side
 					}) : null,
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						type: "button",
+						"aria-pressed": muscles,
+						onClick: () => {
+							setMuscles((value) => !value);
+							setFocus(null);
+						},
+						className: `absolute right-3 top-3 h-8 rounded-full px-3 text-xs font-medium transition-colors duration-150 ${muscles ? "bg-canvas text-ink" : "bg-black/10 text-black/60"}`,
+						children: "肌群"
+					}),
 					!running ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 						className: "absolute bottom-3 right-3 rounded-full bg-canvas px-3 py-1 text-xs text-ink",
 						children: "已暂停"
@@ -1882,6 +1369,33 @@ function SessionScreen({ distance, phase, prefs, onPrefs, onExit, onDone }) {
 							steps.length,
 							side ? ` · ${side}` : ""
 						]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+						className: "mt-3 flex items-baseline gap-3 tabular-nums",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-lg font-semibold",
+							children: doseLabel(dose)
+						}), dose.sets > 1 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+							className: "text-sm text-red",
+							children: [
+								"第 ",
+								currentSet,
+								"/",
+								dose.sets,
+								" 组"
+							]
+						}) : null]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "mt-4",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MuscleLegend, {
+							move: step.move,
+							focus: muscles ? focus : null,
+							onFocus: (id) => {
+								setMuscles(true);
+								setFocus(id);
+							}
+						})
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "mt-4 flex items-center justify-between gap-4",
@@ -2028,7 +1542,7 @@ function Ring({ ms, total }) {
 		})]
 	});
 }
-function clipsFor(routineId, move, side, index, nonce, voice) {
+function clipsFor(routineId, step, index, nonce, voice) {
 	const base = `/voice/${voice}`;
 	const clips = [];
 	if (index === 0 && nonce === 0) {
@@ -2038,16 +1552,21 @@ function clipsFor(routineId, move, side, index, nonce, voice) {
 			text: voiceLines[id] ?? ""
 		});
 	}
-	if (side) {
-		const id = side === "left" ? "side-left" : "side-right";
+	if (step.side) {
+		const id = step.side === "left" ? "side-left" : "side-right";
 		clips.push({
 			src: `${base}/${id}.mp3`,
 			text: voiceLines[id] ?? ""
 		});
 	}
+	const dose = doseLine(prescription(step));
 	clips.push({
-		src: `${base}/${move}.mp3`,
-		text: voiceLines[move] ?? ""
+		src: `${base}/${dose.id}.mp3`,
+		text: dose.text
+	});
+	clips.push({
+		src: `${base}/${step.move}.mp3`,
+		text: voiceLines[step.move] ?? ""
 	});
 	return clips;
 }
